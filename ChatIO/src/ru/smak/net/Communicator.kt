@@ -7,7 +7,7 @@ import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.Socket
 
-class Communicator(val socket: Socket) {
+class Communicator(private val socket: Socket) {
 
     suspend fun startReceiving(dataAnalyser: (String)->Unit){
         val br = BufferedReader(InputStreamReader(socket.getInputStream()))

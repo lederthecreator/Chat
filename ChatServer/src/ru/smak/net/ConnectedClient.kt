@@ -6,7 +6,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import ru.smak.net.Communicator
 import ru.smak.net.entities.ChatUser
 import ru.smak.net.entities.ChatUsers
 import java.net.Socket
@@ -26,7 +25,6 @@ class ConnectedClient(
 
     private val cmn = Communicator(socket)
     private val gson = Gson()
-    private var authData: ChatUser? = null
 
     private var name: String? = null
 
@@ -52,7 +50,7 @@ class ConnectedClient(
         }
     }
 
-    fun parse(data: String) {
+    private fun parse(data: String) {
         val request = Utils.getMapFromJson(data)
 
         when (request["operation"]) {
@@ -134,9 +132,23 @@ class ConnectedClient(
 
                 val jsonSignUpData = gson.toJson(signUpData)
                 val parsedData = Utils.getMapFromJson(jsonSignUpData)
+                val parsedLogin = parsedData["login"].toString()
+                val parsedPassword = parsedData["password"].toString()
 
-                if (parsedData["login"].toString().isEmpty()) {
+                if (parsedLogin.isEmpty()) {
                     sendErrorResponse("SIGNUP", "Логин не может быть пустым")
+                    return
+                }
+
+                val logins = mutableListOf<String>()
+                transaction {
+                    logins.addAll(ChatUser.all().map {
+                        it.login
+                    })
+                }
+
+                if (logins.contains(parsedLogin)) {
+                    sendErrorResponse("SIGNUP", "Пользователь с логином $parsedLogin уже зарегистрирован")
                     return
                 }
 
@@ -145,8 +157,8 @@ class ConnectedClient(
                     addLogger(StdOutSqlLogger)
 
                     regUser = ChatUser.new {
-                        login = parsedData["login"].toString()
-                        password = parsedData["password"].toString()
+                        login = parsedLogin
+                        password = parsedPassword
                     }
                 }
 

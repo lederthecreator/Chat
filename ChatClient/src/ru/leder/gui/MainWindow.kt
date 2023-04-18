@@ -10,6 +10,8 @@ import ru.leder.gui.dto.Dto
 import ru.leder.gui.enums.MessageType
 import java.awt.*
 import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import javax.swing.*
 import javax.swing.border.CompoundBorder
 import javax.swing.border.EmptyBorder
@@ -21,8 +23,6 @@ import javax.swing.text.*
  * @author User
  */
 class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
-    private val gson = Gson()
-
     fun signUpReceiver(login: String) {
         JOptionPane.showMessageDialog(this,
             "Вы успешно зарегистрировались. Добро пожаловать, $login. Снова.")
@@ -63,11 +63,16 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         appendToPane(chatArea!!, "$data\n", color)
     }
 
+    fun errorReceiver(operation: String, data: String) {
+        JOptionPane.showMessageDialog(this,
+            data)
+    }
+
     private fun appendToPane(tp: JTextPane, msg: String, c: Color) {
         val sc = StyleContext.getDefaultStyleContext()
         var aset: AttributeSet? = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c)
 
-        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console")
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Jetbrains Mono")
         aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED)
 
         val len = tp.document.length
@@ -76,46 +81,14 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         tp.setCharacterAttributes(aset, false)
         doc.setCharacterAttributes(len, msg.length, aset, false)
         doc.insertString(doc.length, msg, aset)
-        // tp.text = tp.text + msg
-    }
-
-    private fun changeDocumentStyle(editor: JTextPane) {
-        // Изменение стиля части текста
-        val blue = SimpleAttributeSet()
-        StyleConstants.setForeground(blue, Color.blue)
-        val doc = editor.styledDocument
-        doc.setCharacterAttributes(10, 9, blue, false)
-    }
-
-    /**
-     * Процедура добавления в редактор строки определенного стиля
-     * @param editor редактор
-     * @param string строка
-     * @param style стиль
-     */
-    private fun insertText(
-        editor: JTextPane, string: String,
-        style: Style
-    ) {
-        try {
-            val doc: Document = editor.document
-            doc.insertString(doc.length, string, style)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun errorReceiver(operation: String, data: String) {
-        JOptionPane.showMessageDialog(this,
-            data)
     }
 
     private fun signUpHandler(e: ActionEvent) {
         val dto = Dto(
             operation = "SIGNUP",
             data = object {
-                val login = loginTextBox?.text
-                val password = passwordTextBox?.text
+                val login = loginTextBox?.text?.trim()
+                val password = passwordTextBox?.text?.trim()
             }
         )
 
@@ -126,21 +99,26 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         val dto = Dto(
             operation = "LOGIN",
             data = object {
-                val login = loginTextBox?.text
-                val password = passwordTextBox?.text
+                val login = loginTextBox?.text?.trim()
+                val password = passwordTextBox?.text?.trim()
             }
         )
 
         callback(dto)
     }
 
-    private fun sendMessageHandler(e: ActionEvent) {
+    private fun sendMessageHandler(e: ActionEvent?) {
         val dto = Dto(
             operation = "MESSAGE",
             data = messageTextBox?.text
         )
 
+        messageTextBox?.text = ""
         callback(dto)
+    }
+
+    private fun sendMessageByEnterHandler(e: KeyEvent) {
+
     }
 
     private fun initComponents() {
@@ -163,6 +141,7 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         title = "Chat"
         minimumSize = Dimension(310, 510)
         maximumSize = Dimension(310, 510)
+        defaultCloseOperation = EXIT_ON_CLOSE
          val contentPane = contentPane
         contentPane.layout = GridLayoutManager(2, 1, Insets(0, 0, 0, 0), -1, -1)
         
@@ -244,7 +223,6 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
 
                 //---- chatArea ----
         chatArea!!.font = Font("JetBrains Mono", Font.PLAIN, 16)
-        // chatArea!!.lineWrap = true
         chatArea!!.isEditable = false
         chatArea!!.cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
         scrollPane1!!.setViewportView(chatArea)
@@ -259,7 +237,25 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW, 
         GridConstraints.SIZEPOLICY_CAN_SHRINK, 
         null, null, null))
-        
+
+        messageTextBox?.addKeyListener(
+            object : KeyListener {
+                override fun keyTyped(e: KeyEvent?) { }
+
+                override fun keyPressed(e: KeyEvent?) { }
+
+                override fun keyReleased(e: KeyEvent?) {
+                    if (e == null) {
+                        return
+                    }
+
+                    if (e.keyCode == KeyEvent.VK_ENTER) {
+                        sendMessageHandler(null)
+                    }
+                }
+            }
+        )
+
             //---- button3 ----
         sendMessageButton!!.text = "Send"
         sendMessageButton!!.addActionListener{e:ActionEvent -> sendMessageHandler(e)}

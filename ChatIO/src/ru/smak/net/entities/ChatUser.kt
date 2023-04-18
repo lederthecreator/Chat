@@ -17,5 +17,5 @@ class ChatUser(id: EntityID<Int>) : IntEntity(id) {
 
     var password by ChatUsers.password
 
-    override fun toString(): String = "login: ${login}| password: ${password}";
+    override fun toString(): String = "login: ${login}| password: $password";
 }
