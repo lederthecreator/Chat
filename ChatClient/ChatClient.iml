@@ -10,5 +10,8 @@
     <orderEntry type="module" module-name="ChatIO" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="jetbrains.kotlinx.coroutines.core" level="project" />
+    <orderEntry type="library" exported="" name="google.code.gson" level="project" />
+    <orderEntry type="module" module-name="ChatServer" />
+    <orderEntry type="library" name="IntelliJ IDEA GridLayout" level="project" />
   </component>
 </module>

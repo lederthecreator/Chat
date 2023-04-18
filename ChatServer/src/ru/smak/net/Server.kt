@@ -19,6 +19,8 @@ class Server(
      * Метод выполняет запуск сервера
      */
     fun start() = mainCoroutineScope.launch {
+        val connection = DbContext.Connection
+        DbContext.create()
         while (isActive) {
             try {
                 ss.accept().apply {
