@@ -124,7 +124,7 @@ class Client(
             }
 
             "MESSAGE" -> {
-                println(data)
+                // println(data)
                 mainWindow.messageReceiver(MessageType.UserMessage, data)
             }
 

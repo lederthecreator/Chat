@@ -3,7 +3,6 @@
  */
 package ru.leder.gui
 
-import com.google.gson.Gson
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import ru.leder.gui.dto.Dto
@@ -13,10 +12,10 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import javax.swing.*
-import javax.swing.border.CompoundBorder
-import javax.swing.border.EmptyBorder
-import javax.swing.border.TitledBorder
-import javax.swing.text.*
+import javax.swing.text.AttributeSet
+import javax.swing.text.SimpleAttributeSet
+import javax.swing.text.StyleConstants
+import javax.swing.text.StyleContext
 
 
 /**
@@ -27,24 +26,14 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         JOptionPane.showMessageDialog(this,
             "Вы успешно зарегистрировались. Добро пожаловать, $login. Снова.")
 
-        passwordTextBox?.isEnabled = false
-        loginTextBox?.text = login
-
-        messageTextBox?.isEnabled = true
-        messageTextBox?.isEditable = true
-        sendMessageButton?.isEnabled = true
+        afterAuthentication(login)
     }
 
     fun loginReceiver(login: String) {
         JOptionPane.showMessageDialog(this,
             "Вы успешно вошли. Добро пожаловать, $login. Снова.")
 
-        passwordTextBox?.isEnabled = false
-        loginTextBox?.text = login
-
-        messageTextBox?.isEnabled = true
-        messageTextBox?.isEditable = true
-        sendMessageButton?.isEnabled = true
+        afterAuthentication(login)
     }
 
     fun messageReceiver(type: MessageType, data: String) {
@@ -65,7 +54,20 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
 
     fun errorReceiver(operation: String, data: String) {
         JOptionPane.showMessageDialog(this,
-            data)
+            "Во время операции {$operation} возникла ошибка: $data \n")
+    }
+
+    private fun afterAuthentication(login: String) {
+        passwordTextBox?.isEnabled = false
+        loginTextBox?.text = login
+        loginTextBox?.isEditable = false
+
+        messageTextBox?.isEnabled = true
+        messageTextBox?.isEditable = true
+        sendMessageButton?.isEnabled = true
+
+        button4?.isEnabled = false
+        button5?.isEnabled = false
     }
 
     private fun appendToPane(tp: JTextPane, msg: String, c: Color) {
@@ -117,10 +119,6 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         callback(dto)
     }
 
-    private fun sendMessageByEnterHandler(e: KeyEvent) {
-
-    }
-
     private fun initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         // Generated using JFormDesigner Evaluation license - Alexandr
@@ -148,18 +146,6 @@ class MainWindow(val callback: (Dto) -> Unit) : JFrame() {
         //======== panel3 ========
         run{
         panel3!!.minimumSize = Dimension(291, 100)
-        panel3!!.border = CompoundBorder(
-        TitledBorder(
-            EmptyBorder(0, 0, 0, 0),
-            "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn",
-            TitledBorder.CENTER,
-            TitledBorder.BOTTOM,
-            Font(
-                "Dia\u006cog", Font.BOLD, 12
-            ),
-            Color.red
-        ), panel3!!.border
-    )
         panel3!!.addPropertyChangeListener{ e -> if ("\u0062ord\u0065r" == e.propertyName)throw RuntimeException() }
         panel3!!.layout = GridLayoutManager(3, 3, Insets(0, 0, 0, 0), -1, -1)
         
